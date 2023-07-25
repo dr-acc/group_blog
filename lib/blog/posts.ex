@@ -50,7 +50,7 @@ defmodule Blog.Posts do
 
   """
   def create_post(attrs \\ %{}) do
-    %Post{}
+    %Post{} # Post{} == Blog.Posts.Post
     |> Post.changeset(attrs)
     |> Repo.insert()
   end
