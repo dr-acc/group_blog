@@ -12,7 +12,12 @@ defmodule Blog.PostsTest do
 
     test "search_posts/1 returns filtered posts" do
       post = post_fixture(title: "title")
-      assert false
+      #get_post = Post
+      assert Posts.search_posts("Title") == [post]
+      assert Posts.search_posts("itl") == [post]
+      assert Posts.search_posts("tle") == [post]
+      assert Posts.search_posts("") == [post]
+      assert Posts.search_posts("luis") == []
     end
 
     test "list_posts/0 returns all posts" do
