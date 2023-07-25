@@ -1,5 +1,11 @@
 <.header>
   Posts
+  <.simple_form :let={f} for={%{}} method="get" action={~p"/posts"}>
+    <.input field={f[:title]}, type="text", label="Search Posts"/>
+    <:actions>
+      <.button>Search</.button>
+    </:actions>
+  </.simple_form> 
   <:actions>
     <.link href={~p"/posts/new"}>
       <.button>+</.button>

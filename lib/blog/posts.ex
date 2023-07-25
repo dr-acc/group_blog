@@ -8,6 +8,12 @@ defmodule Blog.Posts do
 
   alias Blog.Posts.Post
 
+  def search_posts(title) do
+    Repo.all(Post)
+
+
+  end
+
   @doc """
   Returns the list of posts.
 
