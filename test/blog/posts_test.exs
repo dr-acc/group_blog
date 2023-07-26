@@ -10,6 +10,15 @@ defmodule Blog.PostsTest do
 
     @invalid_attrs %{content: nil, subtitle: nil, title: nil}
 
+    test "search_posts/1 returns filtered posts" do
+      post = post_fixture(title: "title")
+      assert Posts.search_posts("Title") == [post]
+      assert Posts.search_posts("itl") == [post]
+      assert Posts.search_posts("tle") == [post]
+      assert Posts.search_posts("") == [post]
+      assert Posts.search_posts("luis") == []
+    end
+
     test "list_posts/0 returns all posts" do
       post = post_fixture()
       assert Posts.list_posts() == [post]
@@ -21,11 +30,11 @@ defmodule Blog.PostsTest do
     end
 
     test "create_post/1 with valid data creates a post" do
-      valid_attrs = %{content: "some content", subtitle: "some subtitle", title: "some title"}
+      valid_attrs = %{content: "some content", visibility: true, title: "some title"}
 
       assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs)
       assert post.content == "some content"
-      assert post.subtitle == "some subtitle"
+      assert post.visibility == true
       assert post.title == "some title"
     end
 
@@ -35,11 +44,16 @@ defmodule Blog.PostsTest do
 
     test "update_post/2 with valid data updates the post" do
       post = post_fixture()
-      update_attrs = %{content: "some updated content", subtitle: "some updated subtitle", title: "some updated title"}
+
+      update_attrs = %{
+        content: "some updated content",
+        visibility: false,
+        title: "some updated title"
+      }
 
       assert {:ok, %Post{} = post} = Posts.update_post(post, update_attrs)
       assert post.content == "some updated content"
-      assert post.subtitle == "some updated subtitle"
+      assert post.visibility == false
       assert post.title == "some updated title"
     end
 

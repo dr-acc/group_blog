@@ -20,4 +20,5 @@
 |> Enum.map(fn each ->
 Blog.Repo.insert!(%Blog.Posts.Post{title: "Sample title #{each}", subtitle: "subtitle #{each}",
 content: "Blog.Repo.insert!(%Blog.Posts.Post{} #{each}"})
-end)
+end
+)

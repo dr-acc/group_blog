@@ -12,8 +12,9 @@ defmodule Blog.PostsFixtures do
       attrs
       |> Enum.into(%{
         content: "some content",
-        subtitle: "some subtitle",
-        title: "some title"
+        visibility: Enum.random([true, false]),
+        title: "some title",
+        published_on: DateTime.utc_now()
       })
       |> Blog.Posts.create_post()
 

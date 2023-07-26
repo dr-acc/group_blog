@@ -20,7 +20,14 @@ defmodule BlogWeb.Router do
     get "/", PageController, :home
 
     get "/posts", PostController, :index
-    resources "/posts", PostController
+
+    get "/posts/new", PostController, :new
+    get "/posts/:id", PostController, :show
+    post "/posts", PostController, :create
+    get "/posts/:id/edit", PostController, :edit
+    patch "/posts/:id", PostController, :update
+    put "/posts/:id", PostController, :update
+    delete "/posts/:id", PostController, :delete
   end
 
   # Other scopes may use custom stacks.

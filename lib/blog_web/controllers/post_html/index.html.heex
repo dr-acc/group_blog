@@ -1,5 +1,11 @@
 <.header>
   Posts
+  <.simple_form :let={f} for={%{}} method="get" action={~p"/posts"}>
+    <.input field={f[:title]}, type="text", label="Search Posts"/>
+    <:actions>
+      <.button>Search</.button>
+    </:actions>
+  </.simple_form> 
   <:actions>
     <.link href={~p"/posts/new"}>
       <.button>+</.button>
@@ -9,7 +15,8 @@
 
 <.table id="posts" rows={@posts} row_click={&JS.navigate(~p"/posts/#{&1}")}>
   <:col :let={post} label="Title"><%= post.title %></:col>
-  <:col :let={post} label="Subtitle"><%= post.subtitle %></:col>
+  <:col :let={post} label="Published on"><%= Calendar.strftime(post.published_on, "%c") %></:col>
+  <:col :let={post} label="Visibility"><%= post.visibility %></:col>
   <:col :let={post} label="Content"><%= post.content %></:col>
   <:col :let={post} label="ID"><%= post.id %></:col>
   <:action :let={post}>
