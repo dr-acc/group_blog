@@ -3,13 +3,14 @@ defmodule BlogWeb.PostControllerTest do
 
   import Blog.PostsFixtures
 
-  @create_attrs %{content: "some content", subtitle: "some subtitle", title: "some title"}
+
+  @create_attrs %{content: "some content", visibility: true, title: "some title"}
   @update_attrs %{
     content: "some updated content",
-    subtitle: "some updated subtitle",
+    visibility: true,
     title: "some updated title"
   }
-  @invalid_attrs %{content: nil, subtitle: nil, title: nil}
+  @invalid_attrs %{content: nil, title: nil}
 
   describe "index" do
     test "lists all posts", %{conn: conn} do
@@ -30,7 +31,7 @@ defmodule BlogWeb.PostControllerTest do
 
       conn = get(conn, ~p"/posts", title: "my_awesome_title")
       assert html_response(conn, 200) =~ found.title
-      assert html_response(conn, 200) =~ found.subtitle
+      # assert html_response(conn, 200) =~ found.visibility
       refute html_response(conn, 200) =~ not_found.title
     end
   end

@@ -5,7 +5,6 @@ defmodule BlogWeb.PostController do
   alias Blog.Posts.Post
 
   def index(conn, %{"title" => title}) do
-    IO.inspect("I was here!")
     posts = Posts.search_posts(title)
     IO.inspect(posts)
     render(conn, :index, posts: posts)
