@@ -7,8 +7,47 @@ defmodule Blog.PostsTest do
     alias Blog.Posts.Post
 
     import Blog.PostsFixtures
+    @invalid_attrs %{content: nil, visibility: nil, title: nil, published_on: nil}
 
-    @invalid_attrs %{content: nil, subtitle: nil, title: nil}
+    test "posts sorted most recent on top" do
+      first_post =
+        post_fixture(
+          title: "First post",
+          published_on: ~U[2023-07-25 18:14:15Z],
+          visibility: true
+        )
+
+      second_post =
+        post_fixture(
+          title: "Second post",
+          published_on: ~U[2023-07-26 18:14:15Z],
+          visibility: true
+        )
+
+      third_post =
+        post_fixture(
+          title: "Third post",
+          published_on: ~U[2023-07-27 18:14:15Z],
+          visibility: true
+        )
+
+      assert Posts.list_posts() |> Enum.map(fn %{id: id} -> id end) == [
+               third_post.id,
+               second_post.id,
+               first_post.id
+             ]
+
+      # IO.inspect(all_post, label: "********* Alena's inspect *********")
+    end
+
+    test "posts with visibility true display but not false" do
+      not_visible_post = post_fixture(title: "First post", visibility: false)
+
+      visible_post = post_fixture(title: "Second post", visibility: true)
+
+      assert Posts.list_posts() == [visible_post]
+
+    end
 
     test "search_posts/1 returns filtered posts" do
       post = post_fixture(title: "title")
@@ -17,10 +56,12 @@ defmodule Blog.PostsTest do
       assert Posts.search_posts("tle") == [post]
       assert Posts.search_posts("") == [post]
       assert Posts.search_posts("luis") == []
+      IO.inspect(post)
     end
 
     test "list_posts/0 returns all posts" do
       post = post_fixture()
+      IO.inspect(post)
       assert Posts.list_posts() == [post]
     end
 
@@ -72,6 +113,24 @@ defmodule Blog.PostsTest do
     test "change_post/1 returns a post changeset" do
       post = post_fixture()
       assert %Ecto.Changeset{} = Posts.change_post(post)
+    end
+
+    #test that posts with future dates don't show yet
+    test "posts published in past display; future posts do not" do
+      _future_post =
+        post_fixture(
+          title: "Future post",
+          visibility: true,
+          published_on: DateTime.add(DateTime.utc_now, 1, :hour)
+        )
+
+      past_post =
+        post_fixture(
+          title: "Past post",
+          visibility: true,
+          published_on: DateTime.utc_now()
+        )
+      assert Posts.list_posts() == [past_post]
     end
   end
 end

@@ -10,10 +10,12 @@ defmodule Blog.Posts do
 
   def search_posts(title \\ "") do
     search = "%#{title}%"
+
     query =
       from(p in Post,
-      where: ilike(p.title, ^search)
+        where: ilike(p.title, ^search)
       )
+
     Repo.all(query)
   end
 
@@ -26,8 +28,17 @@ defmodule Blog.Posts do
       [%Post{}, ...]
 
   """
-  def list_posts do
-    Repo.all(Post)
+  def list_posts(title \\ "") do
+    search = "%#{title}%"
+    today = DateTime.utc_now()
+    query =
+      Post
+      |> where([p], ilike(p.title, ^search))
+      |> where([p], p.visibility)
+      |> where([p], p.published_on <= type(^today, :utc_datetime))
+      |> order_by([p], desc: p.published_on)
+
+    Repo.all(query)
   end
 
   @doc """
@@ -59,7 +70,8 @@ defmodule Blog.Posts do
 
   """
   def create_post(attrs \\ %{}) do
-    %Post{} # Post{} == Blog.Posts.Post
+    # Post{} == Blog.Posts.Post
+    %Post{}
     |> Post.changeset(attrs)
     |> Repo.insert()
   end
