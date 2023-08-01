@@ -5,7 +5,7 @@
 # Inside the script, you can read and write to any of your
 # repositories directly:
 #
-    # Blog.Repo.insert!(%Blog.SomeSchema{})
+# Blog.Repo.insert!(%Blog.SomeSchema{})
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
@@ -18,7 +18,10 @@
 # end)
 1..10
 |> Enum.map(fn each ->
-Blog.Repo.insert!(%Blog.Posts.Post{title: "Sample title #{each}", subtitle: "subtitle #{each}",
-content: "Blog.Repo.insert!(%Blog.Posts.Post{} #{each}"})
-end
-)
+  Blog.Repo.insert!(%Blog.Posts.Post{
+    title: "Sample title #{each}",
+    content: "Blog.Repo.insert!(%Blog.Posts.Post{} #{each}",
+    published_on: DateTime.truncate(DateTime.utc_now(), :second),
+    visibility: true
+  })
+end)

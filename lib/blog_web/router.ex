@@ -28,6 +28,7 @@ defmodule BlogWeb.Router do
     patch "/posts/:id", PostController, :update
     put "/posts/:id", PostController, :update
     delete "/posts/:id", PostController, :delete
+    post "/comment", PostController, :create_comment
   end
 
   # Other scopes may use custom stacks.

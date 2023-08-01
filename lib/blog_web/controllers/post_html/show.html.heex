@@ -12,7 +12,20 @@
   <:item title="Title"><%= @post.title %></:item>
   <:item title="Published on"><%= @post.published_on %></:item>
   <:item title="Content"><%= @post.content %></:item>
-   <:item title="Visibility"><%= @post.visibility %></:item>
+  <:item title="Visibility"><%= @post.visibility %></:item>
 </.list>
+
+<.table id="comments" rows={@post.comments} >
+  <:col :let={comment} label="Comments"><%= comment.content %></:col>
+</.table>
+
+<.simple_form :let={f} for={@comment_changeset} action={"/comment"}>
+  <.input field={f[:content]} type="text" label="Comment" />
+  <.input field={f[:post_id]} type="hidden" value={@post.id} />
+  <:actions>
+    <.button>Comment</.button>
+  </:actions>
+</.simple_form>
+
 
 <.back navigate={~p"/posts"}>Back to posts</.back>

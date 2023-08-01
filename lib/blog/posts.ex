@@ -22,18 +22,18 @@ defmodule Blog.Posts do
   @doc """
   Returns the list of posts.
 
+
+
   ## Examples
 
       iex> list_posts()
       [%Post{}, ...]
 
   """
-  def list_posts(title \\ "") do
-    search = "%#{title}%"
+  def list_posts() do
     today = DateTime.utc_now()
     query =
       Post
-      |> where([p], ilike(p.title, ^search))
       |> where([p], p.visibility)
       |> where([p], p.published_on <= type(^today, :utc_datetime))
       |> order_by([p], desc: p.published_on)
@@ -55,8 +55,7 @@ defmodule Blog.Posts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_post!(id), do: Repo.get!(Post, id)
-
+  def get_post!(id), do: from(p in Post, preload: [:comments]) |> Repo.get!(id)
   @doc """
   Creates a post.
 
