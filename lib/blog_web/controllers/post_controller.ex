@@ -3,6 +3,8 @@ defmodule BlogWeb.PostController do
 
   alias Blog.Posts
   alias Blog.Posts.Post
+  alias Blog.Comments
+  alias Blog.Comments.Comment
 
   def index(conn, %{"title" => title}) do
     posts = Posts.search_posts(title)
@@ -31,9 +33,25 @@ defmodule BlogWeb.PostController do
     end
   end
 
+  def create_comment(conn, %{"comment" => comment_params}) do
+    IO.inspect(comment_params, label: "COMMENT PARAMS")
+    case Comments.create_comment(comment_params) do
+      {:ok, comment} ->
+        IO.inspect("HI THIS IS THE FIRST STRING")
+        conn
+        |> put_flash(:info, "Comment created successfully.")
+        |> redirect(to: ~p"/posts/#{comment.post_id}")
+      {:error, %Ecto.Changeset{} = comment_changeset} ->
+        post = Posts.get_post!(comment_params["post_id"])
+        render(conn, :show, post: post, comment_changeset: comment_changeset)
+    end
+  end
+
   def show(conn, %{"id" => id}) do
     post = Posts.get_post!(id)
-    render(conn, :show, post: post)
+    comment_changeset = Comments.change_comment(%Comment{})
+
+    render(conn, :show, post: post, comment_changeset: comment_changeset)
   end
 
   def edit(conn, %{"id" => id}) do

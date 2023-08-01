@@ -5,7 +5,7 @@
   <.input field={f[:title]} type="text" label="Title" />
   <.input field={f[:visibility]} type="checkbox" label="Visibility" />
   <.input field={f[:content]} type="text" label="Content" />
-   <.input field={f[:published_on]} type="datetime-local" label="Published on" value={DateTime.utc_now()} />
+  <.input field={f[:published_on]} type="datetime-local" label="Published on" value={DateTime.utc_now()} />
   <:actions>
     <.button>Save Post</.button>
   </:actions>

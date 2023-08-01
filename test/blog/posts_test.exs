@@ -2,11 +2,13 @@ defmodule Blog.PostsTest do
   use Blog.DataCase
 
   alias Blog.Posts
+  alias Blog.Comments
 
   describe "posts" do
     alias Blog.Posts.Post
 
     import Blog.PostsFixtures
+    import Blog.CommentsFixtures
     @invalid_attrs %{content: nil, visibility: nil, title: nil, published_on: nil}
 
     test "posts sorted most recent on top" do
@@ -46,7 +48,6 @@ defmodule Blog.PostsTest do
       visible_post = post_fixture(title: "Second post", visibility: true)
 
       assert Posts.list_posts() == [visible_post]
-
     end
 
     test "search_posts/1 returns filtered posts" do
@@ -60,14 +61,31 @@ defmodule Blog.PostsTest do
     end
 
     test "list_posts/0 returns all posts" do
-      post = post_fixture()
+      post = post_fixture(visibility: true)
       IO.inspect(post)
       assert Posts.list_posts() == [post]
     end
 
     test "get_post!/1 returns the post with given id" do
+      post = post_fixture(visibility: true)
+
+      fetched_post = Posts.get_post!(post.id)
+      assert fetched_post.id == post.id
+      assert fetched_post.title == post.title
+      assert fetched_post.published_on == post.published_on
+      # assert Posts.get_post!(post.id).title == post.title
+      # assert Posts.get_post!(post.id).published_on == post.published_on
+    end
+
+    test "get_post!/1 returns the post with comments" do
+      #arange
       post = post_fixture()
-      assert Posts.get_post!(post.id) == post
+      comment1 = comment_fixture(post_id: post.id)
+      comment2 = comment_fixture(post_id: post.id)
+      #act
+      fetched_post = Posts.get_post!(post.id)
+      #assert
+      assert fetched_post.comments == [comment1, comment2]
     end
 
     test "create_post/1 with valid data creates a post" do
@@ -101,7 +119,10 @@ defmodule Blog.PostsTest do
     test "update_post/2 with invalid data returns error changeset" do
       post = post_fixture()
       assert {:error, %Ecto.Changeset{}} = Posts.update_post(post, @invalid_attrs)
-      assert post == Posts.get_post!(post.id)
+      fetched_post = Posts.get_post!(post.id)
+      assert post.published_on == fetched_post.published_on
+      assert post.title == fetched_post.title
+      assert post.content == fetched_post.content
     end
 
     test "delete_post/1 deletes the post" do
@@ -115,13 +136,13 @@ defmodule Blog.PostsTest do
       assert %Ecto.Changeset{} = Posts.change_post(post)
     end
 
-    #test that posts with future dates don't show yet
+    # test that posts with future dates don't show yet
     test "posts published in past display; future posts do not" do
       _future_post =
         post_fixture(
           title: "Future post",
           visibility: true,
-          published_on: DateTime.add(DateTime.utc_now, 1, :hour)
+          published_on: DateTime.add(DateTime.utc_now(), 1, :hour)
         )
 
       past_post =
@@ -130,6 +151,7 @@ defmodule Blog.PostsTest do
           visibility: true,
           published_on: DateTime.utc_now()
         )
+
       assert Posts.list_posts() == [past_post]
     end
   end
