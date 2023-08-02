@@ -8,6 +8,7 @@ defmodule Blog.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+    has_many :post, Blog.Posts.Post
 
     timestamps()
   end
@@ -37,10 +38,10 @@ defmodule Blog.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:username, :email, :password])
-    |> validate_username(opts)
+    |> cast(attrs, [:email, :password, :username])
     |> validate_email(opts)
     |> validate_password(opts)
+    |> validate_username(opts)
   end
 
   defp validate_email(changeset, opts) do
@@ -60,6 +61,12 @@ defmodule Blog.Accounts.User do
     # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
     # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
+  end
+
+  defp validate_username(changeset, opts) do
+    changeset
+    |> validate_required([:username])
+    |> validate_length(:username, min: 4, max: 20)
   end
 
   defp maybe_hash_password(changeset, opts) do
