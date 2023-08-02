@@ -16,12 +16,21 @@
 #   content: " Enum.reduce Enum.reduce([1, 2, 3, 4], fn x, acc -> x * acc end)"}}
 #   )
 # end)
+user =
+  Blog.Repo.insert!(%Blog.Accounts.User{
+    username: "im_blx",
+    email: "thisisnotmyemail@gmail.com",
+    password: "password123",
+    hashed_password: "password123"
+  })
+
 1..10
 |> Enum.map(fn each ->
   Blog.Repo.insert!(%Blog.Posts.Post{
     title: "Sample title #{each}",
     content: "Blog.Repo.insert!(%Blog.Posts.Post{} #{each}",
     published_on: DateTime.truncate(DateTime.utc_now(), :second),
-    visibility: true
+    visibility: true,
+    user_id: user.id
   })
 end)

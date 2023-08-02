@@ -8,6 +8,7 @@ defmodule Blog.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+    has_many :post, Blog.Posts.Post
 
     timestamps()
   end
@@ -37,8 +38,7 @@ defmodule Blog.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:username, :email, :password])
-    |> validate_username(opts)
+    |> cast(attrs, [:email, :password])
     |> validate_email(opts)
     |> validate_password(opts)
   end
