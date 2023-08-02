@@ -23,14 +23,6 @@ defmodule BlogWeb.PostControllerTest do
     test "search posts", %{conn: conn} do
       user = user_fixture()
       found = post_fixture(title: "my_awesome_title", visibility: true, user_id: user.id)
-
-      # found =
-      #   post_fixture(%{
-      #     title: "my_awesome_title",
-      #     visibility: true,
-      #     user_id: user.id
-      #   })
-
       not_found = post_fixture(title: "boring_title", visibility: true,  user_id: user.id)
 
       conn = get(conn, ~p"/posts", title: "my_awesome_title")
@@ -42,7 +34,11 @@ defmodule BlogWeb.PostControllerTest do
 
   describe "new post" do
     test "renders form", %{conn: conn} do
-      conn = get(conn, ~p"/posts/new")
+      user = user_fixture()
+      conn = conn
+          |> log_in_user(user)
+          |> get(~p"/posts/new")
+
       assert html_response(conn, 200) =~ "New Post"
     end
   end
@@ -50,10 +46,11 @@ defmodule BlogWeb.PostControllerTest do
   describe "create post" do
     test "redirects to show when data is valid", %{conn: conn} do
       user = user_fixture()
+      conn = log_in_user(conn, user)
+
       post_attr = %{title: "awesome title", content: "some content", visibility: true, user_id: user.id}
 
       conn = post(conn, ~p"/posts", post: post_attr)
-      # IO.inspect(conn, label: "****** CREATE TEST ******")
       assert %{id: id} = redirected_params(conn)
       assert redirected_to(conn) == ~p"/posts/#{id}"
 
@@ -62,16 +59,18 @@ defmodule BlogWeb.PostControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/posts", post: @invalid_attrs)
+      user = user_fixture()
+      conn = conn |> log_in_user(user) |> post(~p"/posts", post: @invalid_attrs)
       assert html_response(conn, 200) =~ "New Post"
     end
   end
 
   describe "edit post" do
-    #setup [:create_post]
     test "renders form for editing chosen post", %{conn: conn} do #post: post
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
+      conn = log_in_user(conn, user)
+
       conn = get(conn, ~p"/posts/#{post}/edit")
       assert html_response(conn, 200) =~ "Edit Post"
     end
@@ -81,6 +80,8 @@ defmodule BlogWeb.PostControllerTest do
     test "redirects when data is valid", %{conn: conn} do
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
+      conn = log_in_user(conn,user)
+
       conn = put(conn, ~p"/posts/#{post}", post: @update_attrs)
       assert redirected_to(conn) == ~p"/posts/#{post}"
 
@@ -91,6 +92,8 @@ defmodule BlogWeb.PostControllerTest do
     test "renders errors when data is invalid", %{conn: conn} do
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
+      conn = log_in_user(conn, user)
+
       conn = put(conn, ~p"/posts/#{post}", post: @invalid_attrs)
       assert html_response(conn, 200) =~ "Edit Post"
     end
@@ -100,6 +103,7 @@ defmodule BlogWeb.PostControllerTest do
     test "deletes chosen post", %{conn: conn} do
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
+      conn = log_in_user(conn, user)
 
       conn = delete(conn, ~p"/posts/#{post}")
       assert redirected_to(conn) == ~p"/posts"
