@@ -70,6 +70,7 @@ defmodule Blog.PostsTest do
       post = post_fixture(visibility: true)
 
       fetched_post = Posts.get_post!(post.id)
+
       assert fetched_post.id == post.id
       assert fetched_post.title == post.title
       assert fetched_post.published_on == post.published_on
