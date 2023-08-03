@@ -1,4 +1,5 @@
 defmodule BlogWeb.Router do
+
   use BlogWeb, :router
 
   import BlogWeb.UserAuth
@@ -18,20 +19,18 @@ defmodule BlogWeb.Router do
   end
 
   scope "/", BlogWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    resources "/posts", PostController, only: [:new, :edit, :update, :create, :delete]
+    resources "/comments", CommentController, only: [:create, :update, :delete]
+  end
+
+  scope "/", BlogWeb do
     pipe_through :browser
 
     get "/", PageController, :home
+    resources "/posts", PostController, only: [:index, :show]
 
-    get "/posts", PostController, :index
-
-    get "/posts/new", PostController, :new
-    get "/posts/:id", PostController, :show
-    post "/posts", PostController, :create
-    get "/posts/:id/edit", PostController, :edit
-    patch "/posts/:id", PostController, :update
-    put "/posts/:id", PostController, :update
-    delete "/posts/:id", PostController, :delete
-    post "/comment", PostController, :create_comment
   end
 
   # Other scopes may use custom stacks.

@@ -8,6 +8,7 @@ defmodule BlogWeb.PostHTML do
   """
   attr :changeset, Ecto.Changeset, required: true
   attr :action, :string, required: true
+  attr :current_user, :map, required: true
 
   def post_form(assigns)
 end
