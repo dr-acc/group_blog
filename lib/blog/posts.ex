@@ -56,7 +56,7 @@ defmodule Blog.Posts do
       ** (Ecto.NoResultsError)
 
   """
-   def get_post!(id), do: from(p in Post, preload: [:comments]) |> Repo.get!(id)
+   def get_post!(id), do: from(p in Post, preload: [:user, :comments]) |> Repo.get!(id)
   # def get_post!(id) do
   #   get_comments_query = from c in Comment, order_by: [desc: c.id], preload: :user
 

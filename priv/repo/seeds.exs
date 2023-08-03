@@ -24,6 +24,14 @@ user =
     hashed_password: "password123"
   })
 
+  Blog.Repo.insert!(%Blog.Tags.Tag{
+    name: "tag1"
+  })
+
+  Blog.Repo.insert!(%Blog.Tags.Tag{
+    name: "tag2"
+  })
+
 1..10
 |> Enum.map(fn each ->
   Blog.Repo.insert!(%Blog.Posts.Post{
