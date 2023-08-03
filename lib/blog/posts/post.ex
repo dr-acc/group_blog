@@ -7,8 +7,9 @@ defmodule Blog.Posts.Post do
     field :visibility, :boolean
     field :title, :string
     field :published_on, :utc_datetime
-    has_many :comments, Blog.Comments.Comment
+
     belongs_to :user, Blog.Accounts.User
+    has_many :comments, Blog.Comments.Comment
 
     timestamps()
   end

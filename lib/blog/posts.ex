@@ -4,8 +4,9 @@ defmodule Blog.Posts do
   """
 
   import Ecto.Query, warn: false
-  alias Blog.Repo
 
+  alias Blog.Repo
+  alias Blog.Comments.Comment
   alias Blog.Posts.Post
 
   def search_posts(title \\ "") do
@@ -55,7 +56,14 @@ defmodule Blog.Posts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_post!(id), do: from(p in Post, preload: [:comments]) |> Repo.get!(id)
+   def get_post!(id), do: from(p in Post, preload: [:comments]) |> Repo.get!(id)
+  # def get_post!(id) do
+  #   get_comments_query = from c in Comment, order_by: [desc: c.id], preload: :user
+
+  #   get_post_query = from p in Post,  preload: [:user, comments: ^get_comments_query]
+
+  #   Repo.get!(get_post_query, id)
+  # end
   @doc """
   Creates a post.
 

@@ -2,30 +2,36 @@
   Post <%= @post.id %>
   <:subtitle>This is a post record from your database.</:subtitle>
   <:actions>
-    <.link href={~p"/posts/#{@post}/edit"}>
-      <.button>Edit post</.button>
-    </.link>
+    <%= if assigns[:current_user] && @post.user_id==assigns[:current_user].id do %>
+      <.link href={~p"/posts/#{@post}/edit"}>
+        <.button>Edit post</.button>
+      </.link>
+    <% end %>
   </:actions>
 </.header>
 
 <.list>
   <:item title="Title"><%= @post.title %></:item>
+  <:item title="Post Author"><%= @post.user.username %></:item>
   <:item title="Published on"><%= @post.published_on %></:item>
   <:item title="Content"><%= @post.content %></:item>
   <:item title="Visibility"><%= @post.visibility %></:item>
 </.list>
 
-<.table id="comments" rows={@post.comments} >
+<.table id="comments" rows={@post.comments}>
   <:col :let={comment} label="Comments"><%= comment.content %></:col>
+  <:col :let={comment} label="Comment Author"><%= comment.user.username %></:col>
 </.table>
 
-<.simple_form :let={f} for={@comment_changeset} action={"/comment"}>
-  <.input field={f[:content]} type="text" label="Comment" />
-  <.input field={f[:post_id]} type="hidden" value={@post.id} />
-  <:actions>
-    <.button>Comment</.button>
-  </:actions>
-</.simple_form>
-
-
+<%!-- add if --%>
+<%= if assigns[:current_user] do %>
+  <.simple_form :let={f} for={@comment_changeset} action="/comments">
+    <.input field={f[:content]} type="text" label="Comment" />
+    <.input field={f[:post_id]} type="hidden" value={@post.id} />
+    <.input field={f[:user_id]} type="hidden" value={@current_user.id} />
+    <:actions>
+      <.button>Comment</.button>
+    </:actions>
+  </.simple_form>
+<% end %>
 <.back navigate={~p"/posts"}>Back to posts</.back>

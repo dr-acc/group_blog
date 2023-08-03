@@ -7,3 +7,4 @@ defmodule Blog.Repo.Migrations.AddUserIdToComments do
     end
   end
 end
++

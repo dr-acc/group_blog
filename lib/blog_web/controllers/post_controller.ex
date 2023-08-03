@@ -59,6 +59,7 @@ defmodule BlogWeb.PostController do
   def edit(conn, %{"id" => id}) do
     post = Posts.get_post!(id)
     changeset = Posts.change_post(post)
+
     render(conn, :edit, post: post, changeset: changeset)
   end
 
@@ -84,6 +85,7 @@ defmodule BlogWeb.PostController do
     |> put_flash(:info, "Post deleted successfully.")
     |> redirect(to: ~p"/posts")
   end
+
   defp require_user_owns_post(conn, _params) do
     post_id = String.to_integer(conn.path_params["id"])
     post = Posts.get_post!(post_id)

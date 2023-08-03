@@ -61,7 +61,6 @@ defmodule Blog.PostsTest do
       assert Posts.search_posts("tle") == [post]
       assert Posts.search_posts("") == [post]
       assert Posts.search_posts("luis") == []
-      IO.inspect(post)
     end
 
     test "list_posts/0 returns all posts" do
@@ -74,7 +73,6 @@ defmodule Blog.PostsTest do
     test "get_post!/1 returns the post with given id" do
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
-      IO.inspect(post)
       fetched_post = Posts.get_post!(post.id)
 
       assert fetched_post.id == post.id
@@ -92,9 +90,8 @@ defmodule Blog.PostsTest do
 
       comment1 = comment_fixture(post_id: post.id, user_id: user.id)
       comment2 = comment_fixture(post_id: post.id, user_id: user.id)
-
+      IO.inspect(comment1)
       fetched_post = Posts.get_post!(post.id)
-
       assert fetched_post.comments == [comment1, comment2]
     end
 

@@ -8,6 +8,7 @@ defmodule Blog.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+
     has_many :post, Blog.Posts.Post
 
     timestamps()
@@ -41,7 +42,7 @@ defmodule Blog.Accounts.User do
     |> cast(attrs, [:email, :password, :username])
     |> validate_email(opts)
     |> validate_password(opts)
-    |> validate_username(opts)
+    |> validate_username()
   end
 
   defp validate_email(changeset, opts) do
@@ -63,7 +64,7 @@ defmodule Blog.Accounts.User do
     |> maybe_hash_password(opts)
   end
 
-  defp validate_username(changeset, opts) do
+  defp validate_username(changeset) do
     changeset
     |> validate_required([:username])
     |> validate_length(:username, min: 4, max: 20)
