@@ -2,7 +2,7 @@ import Config
 
 # Configure your database
 config :blog, Blog.Repo,
-  username: "postgres",
+  username: System.get_env("POSTGRES_USERNAME") || "postgres",
   password: "postgres",
   hostname: "localhost",
   database: "blog_dev",

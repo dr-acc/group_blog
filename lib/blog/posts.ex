@@ -14,7 +14,9 @@ defmodule Blog.Posts do
 
     query =
       from(p in Post,
-        where: ilike(p.title, ^search)
+        where: ilike(p.title, ^search),
+        # fix visibility
+        preload: [:tags]
       )
 
     Repo.all(query)
@@ -33,11 +35,13 @@ defmodule Blog.Posts do
   """
   def list_posts() do
     today = DateTime.utc_now()
+
     query =
       Post
       |> where([p], p.visibility)
       |> where([p], p.published_on <= type(^today, :utc_datetime))
       |> order_by([p], desc: p.published_on)
+      |> preload([:tags])
 
     Repo.all(query)
   end
@@ -56,7 +60,7 @@ defmodule Blog.Posts do
       ** (Ecto.NoResultsError)
 
   """
-   def get_post!(id), do: from(p in Post, preload: [:user, :comments]) |> Repo.get!(id)
+  def get_post!(id), do: from(p in Post, preload: [:user, :comments, :tags]) |> Repo.get!(id)
   # def get_post!(id) do
   #   get_comments_query = from c in Comment, order_by: [desc: c.id], preload: :user
 
