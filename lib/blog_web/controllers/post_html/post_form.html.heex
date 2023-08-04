@@ -7,7 +7,11 @@
   <.input field={f[:visibility]} type="checkbox" label="Visibility" />
   <.input field={f[:content]} type="text" label="Content" />
   <.input field={f[:published_on]} type="datetime-local" label="Published on" value={DateTime.utc_now()} />
+  <.input field={f[:field]} type="select" multiple={true} options={@tags.name}/>
   <:actions>
     <.button>Save Post</.button>
   </:actions>
 </.simple_form>
+
+<%!-- ###Brainstormed notes about "assigns"
+#### map that holds data like the currently logged-in user  --%>

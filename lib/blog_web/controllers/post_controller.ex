@@ -5,6 +5,7 @@ defmodule BlogWeb.PostController do
   alias Blog.Posts.Post
   alias Blog.Comments
   alias Blog.Comments.Comment
+  alias Blog.Tags
 
   plug :require_user_owns_post when action in [:edit, :update, :delete]
 
@@ -12,6 +13,11 @@ defmodule BlogWeb.PostController do
     posts = Posts.search_posts(title)
     render(conn, :index, posts: posts)
   end
+  ####psuedo
+  # def index(conn, %{"title" => title}) do
+  #   posts = Posts.search_posts(title)
+  #   render(conn, :index, [posts: posts, tags: tags])
+  # end
 
   def index(conn, _params) do
     posts = Posts.list_posts()
@@ -19,8 +25,8 @@ defmodule BlogWeb.PostController do
   end
 
   def new(conn, _params) do
-    changeset = Posts.change_post(%Post{})
-    render(conn, :new, changeset: changeset)
+    changeset = Posts.change_post(%Post{tags: []})
+    render(conn, :new, [changeset: changeset, tags: []])
   end
 
   def create(conn, %{"post" => post_params}) do
