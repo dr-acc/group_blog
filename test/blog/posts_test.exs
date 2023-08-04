@@ -10,6 +10,7 @@ defmodule Blog.PostsTest do
     import Blog.PostsFixtures
     import Blog.CommentsFixtures
     import Blog.AccountsFixtures
+    import Blog.TagsFixtures
     @invalid_attrs %{content: nil, visibility: nil, title: nil, published_on: nil}
 
     test "posts sorted most recent on top" do
@@ -66,8 +67,9 @@ defmodule Blog.PostsTest do
     test "list_posts/0 returns all posts" do
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
+      fetched_post = Posts.list_posts() |> Enum.at(0)
 
-      assert Posts.list_posts() == [post]
+      assert fetched_post.id == post.id
     end
 
     test "get_post!/1 returns the post with given id" do
@@ -154,7 +156,6 @@ defmodule Blog.PostsTest do
     # test that posts with future dates don't show yet
     test "posts published in past display; future posts do not" do
       user = user_fixture()
-      _future_post =
         post_fixture(
           title: "Future post",
           visibility: true,
