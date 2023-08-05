@@ -67,6 +67,7 @@ defmodule Blog.PostsTest do
     test "list_posts/0 returns all posts" do
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
+
       fetched_post = Posts.list_posts() |> Enum.at(0)
 
       assert fetched_post.id == post.id
@@ -115,6 +116,7 @@ defmodule Blog.PostsTest do
 
     test "update_post/2 with valid data updates the post" do
       user = user_fixture()
+      tags = tag_fixture()
       post = post_fixture(user_id: user.id)
 
       update_attrs = %{
@@ -123,7 +125,7 @@ defmodule Blog.PostsTest do
         title: "some updated title",
         user_id: user.id
       }
-
+      update_post = Posts.update_post(post, update_attrs)
       assert {:ok, %Post{} = post} = Posts.update_post(post, update_attrs)
       assert post.content == "some updated content"
       assert post.visibility == false
@@ -172,6 +174,25 @@ defmodule Blog.PostsTest do
         )
 
       assert Posts.list_posts() == [past_post]
+    end
+
+    test "load post with tags association" do
+      user = user_fixture()
+      # comment1 = comment_fixture(post_id: post.id, user_id: user.id)
+
+      tag = tag_fixture()
+      post = post_fixture(%{
+        title: "Post with tags",
+        content: "some content",
+        visibility: true,
+        user_id: user.id,
+        tags: [tag]
+      })
+      IO.inspect(tag, label: "***** TAGs *******")
+      IO.inspect(post, label: "***** POSTs *******")
+
+      get_post = Posts.get_post!(post.id)
+      IO.inspect(post, label: "***** GET POST ReTurn *******")
     end
   end
 end
