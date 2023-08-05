@@ -25,8 +25,8 @@ defmodule BlogWeb.PostController do
   end
 
   def new(conn, _params) do
-    changeset = Posts.change_post(%Post{tags: []})
-    render(conn, :new, [changeset: changeset, tags: []])
+    changeset = Posts.change_post(%Post{})
+    render(conn, :new, changeset: changeset, tags: tag_options())
   end
 
   def create(conn, %{"post" => post_params}) do
@@ -37,15 +37,13 @@ defmodule BlogWeb.PostController do
         |> redirect(to: ~p"/posts/#{post}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset)
+        render(conn, :new, changeset: changeset, tags: tag_options())
     end
   end
 
   def create_comment(conn, %{"comment" => comment_params}) do
-    IO.inspect(comment_params, label: "COMMENT PARAMS")
     case Comments.create_comment(comment_params) do
       {:ok, comment} ->
-        IO.inspect("HI THIS IS THE FIRST STRING")
         conn
         |> put_flash(:info, "Comment created successfully.")
         |> redirect(to: ~p"/posts/#{comment.post_id}")
@@ -66,7 +64,7 @@ defmodule BlogWeb.PostController do
     post = Posts.get_post!(id)
     changeset = Posts.change_post(post)
 
-    render(conn, :edit, post: post, changeset: changeset)
+    render(conn, :edit, post: post, changeset: changeset, tags: tag_options())
   end
 
   def update(conn, %{"id" => id, "post" => post_params}) do
@@ -104,6 +102,13 @@ defmodule BlogWeb.PostController do
       |> redirect(to: ~p"/posts/#{post_id}")
       |> halt()
     end
+  end
+
+  defp tag_options(selected_ids \\ []) do
+    Tags.list_tags()
+    |> Enum.map(fn tag ->
+      [key: tag.name, value: tag.id, selected: tag.id in selected_ids]
+    end)
   end
 
 end

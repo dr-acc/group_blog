@@ -1,9 +1,12 @@
 defmodule BlogWeb.PostControllerTest do
   use BlogWeb.ConnCase
 
+  alias Blog.Posts
+
   import Blog.AccountsFixtures
   import Blog.CommentsFixtures
   import Blog.PostsFixtures
+  import Blog.TagsFixtures
 
 
   @create_attrs %{content: "some content", visibility: true, title: "some title"}
@@ -42,13 +45,19 @@ defmodule BlogWeb.PostControllerTest do
       assert html_response(conn, 200) =~ "New Post"
     end
   end
+  test "show pages contains tags"
+
 
   describe "create post" do
     test "redirects to show when data is valid", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
 
-      post_attr = %{title: "awesome title", content: "some content", visibility: true, user_id: user.id}
+      post_attr =
+        %{title: "awesome title",
+        content: "some content",
+        visibility: true,
+        user_id: user.id}
 
       conn = post(conn, ~p"/posts", post: post_attr)
       assert %{id: id} = redirected_params(conn)
@@ -89,12 +98,14 @@ defmodule BlogWeb.PostControllerTest do
       assert html_response(conn, 200) =~ "some updated content"
     end
 
+    test "update posts should preserve tags "
+
     test "renders errors when data is invalid", %{conn: conn} do
       user = user_fixture()
-      post = post_fixture(visibility: true, user_id: user.id)
+      # post_fixture(visibility: true, user_id: user.id)
       conn = log_in_user(conn, user)
 
-      conn = put(conn, ~p"/posts/#{post}", post: @invalid_attrs)
+      conn = put(conn, ~p"/posts/", post: @invalid_attrs)
       assert html_response(conn, 200) =~ "Edit Post"
     end
   end
