@@ -29,15 +29,19 @@ defmodule BlogWeb.PostController do
     render(conn, :new, changeset: changeset, tags: tag_options())
   end
 
+  @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, %{"post" => post_params}) do
-    case Posts.create_post(post_params) do
+    tags = Map.get(post_params, "tags_ids", [])
+    |>Enum.map(fn each -> Tags.get_tag!(each) end)
+    ###THIS WORKED... imitate?! ^^^^^
+    case Posts.create_post(post_params, tags) do
       {:ok, post} ->
         conn
         |> put_flash(:info, "Post created successfully.")
         |> redirect(to: ~p"/posts/#{post}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset, tags: tag_options())
+        render(conn, :new, changeset: changeset, tags: tag_options(tags))
     end
   end
 

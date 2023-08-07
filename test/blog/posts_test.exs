@@ -87,7 +87,6 @@ defmodule Blog.PostsTest do
     end
 
     test "get_post!/1 returns the post with comments" do
-      #arange
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
 
@@ -114,10 +113,30 @@ defmodule Blog.PostsTest do
       assert {:error, %Ecto.Changeset{}} = Posts.create_post(@invalid_attrs)
     end
 
+    test "create_post/1 with tags" do
+      user = user_fixture()
+      tag = tag_fixture()
+      valid_attrs = %{content: "some content", visibility: true, title: "some title", user_id: user.id}
+
+      assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs, [tag])
+      assert post.tags == [tag]
+    end
+
+    test "update_post/2 with tags" do
+      user = user_fixture()
+      tag = tag_fixture()
+      other_tag = tag_fixture(name: "other name")
+      valid_attrs = %{content: "some content", visibility: true, title: "some title", user_id: user.id, tags: [tag]}
+
+      post = post_fixture(valid_attrs)
+      IO.inspect(post, label: "------------POST------------")
+      assert {:ok, %Post{} = updated_post} = Posts.update_post(post, valid_attrs, [other_tag])
+    end
+
     test "update_post/2 with valid data updates the post" do
       user = user_fixture()
-      tags = tag_fixture()
       post = post_fixture(user_id: user.id)
+      tag = tag_fixture()
 
       update_attrs = %{
         content: "some updated content",
@@ -126,7 +145,7 @@ defmodule Blog.PostsTest do
         user_id: user.id
       }
       update_post = Posts.update_post(post, update_attrs)
-      assert {:ok, %Post{} = post} = Posts.update_post(post, update_attrs)
+      assert {:ok, %Post{} = post} = Posts.update_post(post, update_attrs, [tag])
       assert post.content == "some updated content"
       assert post.visibility == false
       assert post.title == "some updated title"

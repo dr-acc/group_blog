@@ -8,6 +8,7 @@ defmodule Blog.PostsFixtures do
   Generate a post.
   """
   def post_fixture(attrs \\ %{}) do
+    tags = attrs[:tags]
     {:ok, post} =
       attrs
       |> Enum.into(%{
@@ -16,7 +17,7 @@ defmodule Blog.PostsFixtures do
         title: "some title",
         published_on: DateTime.utc_now()
       })
-      |> Blog.Posts.create_post()
+      |> Blog.Posts.create_post(tags)
 
     post
   end
