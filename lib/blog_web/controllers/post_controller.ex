@@ -13,11 +13,7 @@ defmodule BlogWeb.PostController do
     posts = Posts.search_posts(title)
     render(conn, :index, posts: posts)
   end
-  ####psuedo
-  # def index(conn, %{"title" => title}) do
-  #   posts = Posts.search_posts(title)
-  #   render(conn, :index, [posts: posts, tags: tags])
-  # end
+
 
   def index(conn, _params) do
     posts = Posts.list_posts()
@@ -29,15 +25,20 @@ defmodule BlogWeb.PostController do
     render(conn, :new, changeset: changeset, tags: tag_options())
   end
 
+  @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, %{"post" => post_params}) do
-    case Posts.create_post(post_params) do
+    tags =
+      Map.get(post_params, "tag_ids", [])
+      |> Enum.map(fn each -> Tags.get_tag!(each) end)
+
+    case Posts.create_post(post_params, tags) do
       {:ok, post} ->
         conn
         |> put_flash(:info, "Post created successfully.")
         |> redirect(to: ~p"/posts/#{post}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset, tags: tag_options())
+        render(conn, :new, changeset: changeset, tags: tag_options(Enum.map(tags, fn each -> each.id end)))
     end
   end
 
@@ -47,6 +48,7 @@ defmodule BlogWeb.PostController do
         conn
         |> put_flash(:info, "Comment created successfully.")
         |> redirect(to: ~p"/posts/#{comment.post_id}")
+
       {:error, %Ecto.Changeset{} = comment_changeset} ->
         post = Posts.get_post!(comment_params["post_id"])
         render(conn, :show, post: post, comment_changeset: comment_changeset)
@@ -55,6 +57,7 @@ defmodule BlogWeb.PostController do
 
   def show(conn, %{"id" => id}) do
     post = Posts.get_post!(id)
+
     comment_changeset = Comments.change_comment(%Comment{})
 
     render(conn, :show, post: post, comment_changeset: comment_changeset)
@@ -70,14 +73,18 @@ defmodule BlogWeb.PostController do
   def update(conn, %{"id" => id, "post" => post_params}) do
     post = Posts.get_post!(id)
 
-    case Posts.update_post(post, post_params) do
+    tags =
+      Map.get(post_params, "tag_ids", [])
+      |> Enum.map(fn each -> Tags.get_tag!(each) end)
+
+    case Posts.update_post(post, post_params, tags) do
       {:ok, post} ->
         conn
         |> put_flash(:info, "Post updated successfully.")
         |> redirect(to: ~p"/posts/#{post}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :edit, post: post, changeset: changeset)
+        render(conn, :edit, post: post, changeset: changeset, tags: tag_options(Enum.map(tags, fn each -> each.id end)))
     end
   end
 
@@ -110,5 +117,4 @@ defmodule BlogWeb.PostController do
       [key: tag.name, value: tag.id, selected: tag.id in selected_ids]
     end)
   end
-
 end

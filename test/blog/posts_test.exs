@@ -15,6 +15,7 @@ defmodule Blog.PostsTest do
 
     test "posts sorted most recent on top" do
       user = user_fixture()
+
       first_post =
         post_fixture(
           title: "First post",
@@ -81,43 +82,80 @@ defmodule Blog.PostsTest do
       assert fetched_post.id == post.id
       assert fetched_post.title == post.title
       assert fetched_post.published_on == post.published_on
-      #Examples for posterity:
+      # Examples for posterity:
       # assert Posts.get_post!(post.id).title == post.title
       # assert Posts.get_post!(post.id).published_on == post.published_on
     end
 
     test "get_post!/1 returns the post with comments" do
-      #arange
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
 
       comment1 = comment_fixture(post_id: post.id, user_id: user.id)
       comment2 = comment_fixture(post_id: post.id, user_id: user.id)
-      IO.inspect(comment1)
+
       fetched_post = Posts.get_post!(post.id)
       assert fetched_post.comments == [comment1, comment2]
     end
 
     test "create_post/1 with valid data creates a post" do
       user = user_fixture()
-      valid_attrs = %{content: "some content", visibility: true, title: "some title", user_id: user.id}
+
+      valid_attrs = %{
+        content: "some content",
+        visibility: true,
+        title: "some title",
+        user_id: user.id
+      }
 
       assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs)
       assert post.content == "some content"
       assert post.visibility == true
       assert post.title == "some title"
       assert post.user_id == user.id
-
     end
 
     test "create_post/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Posts.create_post(@invalid_attrs)
     end
 
+    test "create_post/1 with tags" do
+      user = user_fixture()
+      tag = tag_fixture()
+
+      valid_attrs = %{
+        content: "some content",
+        visibility: true,
+        title: "some title",
+        user_id: user.id
+      }
+
+      assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs, [tag])
+      assert post.tags == [tag]
+    end
+
+    test "update_post/2 with tags" do
+      user = user_fixture()
+      tag = tag_fixture()
+      other_tag = tag_fixture(name: "other name")
+
+      valid_attrs = %{
+        content: "some content",
+        visibility: true,
+        title: "some title",
+        user_id: user.id
+      }
+
+      post = post_fixture(valid_attrs)
+
+      assert {:ok, %Post{} = updated_post} = Posts.update_post(post, valid_attrs, [other_tag])
+      assert updated_post.tags == [other_tag]
+    end
+
     test "update_post/2 with valid data updates the post" do
       user = user_fixture()
-      tags = tag_fixture()
       post = post_fixture(user_id: user.id)
+      tag = tag_fixture()
 
       update_attrs = %{
         content: "some updated content",
@@ -125,8 +163,9 @@ defmodule Blog.PostsTest do
         title: "some updated title",
         user_id: user.id
       }
+
       update_post = Posts.update_post(post, update_attrs)
-      assert {:ok, %Post{} = post} = Posts.update_post(post, update_attrs)
+      assert {:ok, %Post{} = post} = Posts.update_post(post, update_attrs, [tag])
       assert post.content == "some updated content"
       assert post.visibility == false
       assert post.title == "some updated title"
@@ -158,12 +197,13 @@ defmodule Blog.PostsTest do
     # test that posts with future dates don't show yet
     test "posts published in past display; future posts do not" do
       user = user_fixture()
-        post_fixture(
-          title: "Future post",
-          visibility: true,
-          published_on: DateTime.add(DateTime.utc_now(), 1, :hour),
-          user_id: user.id
-        )
+
+      post_fixture(
+        title: "Future post",
+        visibility: true,
+        published_on: DateTime.add(DateTime.utc_now(), 1, :hour),
+        user_id: user.id
+      )
 
       past_post =
         post_fixture(
@@ -174,25 +214,6 @@ defmodule Blog.PostsTest do
         )
 
       assert Posts.list_posts() == [past_post]
-    end
-
-    test "load post with tags association" do
-      user = user_fixture()
-      # comment1 = comment_fixture(post_id: post.id, user_id: user.id)
-
-      tag = tag_fixture()
-      post = post_fixture(%{
-        title: "Post with tags",
-        content: "some content",
-        visibility: true,
-        user_id: user.id,
-        tags: [tag]
-      })
-      IO.inspect(tag, label: "***** TAGs *******")
-      IO.inspect(post, label: "***** POSTs *******")
-
-      get_post = Posts.get_post!(post.id)
-      IO.inspect(post, label: "***** GET POST ReTurn *******")
     end
   end
 end

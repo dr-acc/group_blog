@@ -14,7 +14,7 @@
   <:item title="Title"><%= @post.title %></:item>
   <:item title="Post Author"><%= @post.user.username %></:item>
   <:item title="Published on"><%= @post.published_on %></:item>
-  <:item title="Tags"><%= @post.tags %></:item>
+  <:item title="Tags"><%= Enum.map(@post.tags, fn tag -> tag.name end) %></:item>
   ### ^Added this first 
   <:item title="Content"><%= @post.content %></:item>
   <:item title="Visibility"><%= @post.visibility %></:item>
@@ -25,7 +25,6 @@
   <:col :let={comment} label="Comment Author"><%= comment.user.username %></:col>
 </.table>
 
-<%!-- add if --%>
 <%= if assigns[:current_user] do %>
   <.simple_form :let={f} for={@comment_changeset} action="/comments">
     <.input field={f[:content]} type="text" label="Comment" />
