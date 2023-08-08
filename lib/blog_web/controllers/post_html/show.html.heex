@@ -25,7 +25,6 @@
   <:col :let={comment} label="Comment Author"><%= comment.user.username %></:col>
 </.table>
 
-<%!-- add if --%>
 <%= if assigns[:current_user] do %>
   <.simple_form :let={f} for={@comment_changeset} action="/comments">
     <.input field={f[:content]} type="text" label="Comment" />

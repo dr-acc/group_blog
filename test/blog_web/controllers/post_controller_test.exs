@@ -8,14 +8,13 @@ defmodule BlogWeb.PostControllerTest do
   import Blog.PostsFixtures
   import Blog.TagsFixtures
 
-
   @create_attrs %{content: "some content", visibility: true, title: "some title"}
   @update_attrs %{
     content: "some updated content",
     visibility: true,
     title: "some updated title"
   }
-  @invalid_attrs %{content: nil, title: nil}
+  @invalid_attrs %{content: nil, title: nil, tag_ids: []}
 
   describe "index" do
     test "lists all posts", %{conn: conn} do
@@ -26,11 +25,11 @@ defmodule BlogWeb.PostControllerTest do
     test "search posts", %{conn: conn} do
       user = user_fixture()
       found = post_fixture(title: "my_awesome_title", visibility: true, user_id: user.id)
-      not_found = post_fixture(title: "boring_title", visibility: true,  user_id: user.id)
+      not_found = post_fixture(title: "boring_title", visibility: true, user_id: user.id)
 
       conn = get(conn, ~p"/posts", title: "my_awesome_title")
+
       assert html_response(conn, 200) =~ found.title
-      # assert html_response(conn, 200) =~ found.visibility
       refute html_response(conn, 200) =~ not_found.title
     end
   end
@@ -38,15 +37,15 @@ defmodule BlogWeb.PostControllerTest do
   describe "new post" do
     test "renders form", %{conn: conn} do
       user = user_fixture()
-      conn = conn
-          |> log_in_user(user)
-          |> get(~p"/posts/new")
+
+      conn =
+        conn
+        |> log_in_user(user)
+        |> get(~p"/posts/new")
 
       assert html_response(conn, 200) =~ "New Post"
     end
   end
-  test "show pages contains tags"
-
 
   describe "create post" do
     test "redirects to show when data is valid", %{conn: conn} do
@@ -54,10 +53,7 @@ defmodule BlogWeb.PostControllerTest do
       conn = log_in_user(conn, user)
 
       post_attr =
-        %{title: "awesome title",
-        content: "some content",
-        visibility: true,
-        user_id: user.id}
+        %{title: "awesome title", content: "some content", visibility: true, user_id: user.id}
 
       conn = post(conn, ~p"/posts", post: post_attr)
       assert %{id: id} = redirected_params(conn)
@@ -65,6 +61,26 @@ defmodule BlogWeb.PostControllerTest do
 
       conn = get(conn, ~p"/posts/#{id}")
       assert html_response(conn, 200) =~ "Post #{id}"
+    end
+
+    test "creating post that contains tags", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      tag = tag_fixture()
+
+      post_attrs = %{
+        content: "some content",
+        title: "some title",
+        visibility: true,
+        user_id: user.id,
+        tag_ids: [tag.id]
+      }
+
+      conn = post(conn, ~p"/posts", post: post_attrs)
+
+      assert %{id: id} = redirected_params(conn)
+      assert redirected_to(conn) == ~p"/posts/#{id}"
+      assert Posts.get_post!(id).tags == [tag]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -75,7 +91,8 @@ defmodule BlogWeb.PostControllerTest do
   end
 
   describe "edit post" do
-    test "renders form for editing chosen post", %{conn: conn} do #post: post
+    # post: post
+    test "renders form for editing chosen post", %{conn: conn} do
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
       conn = log_in_user(conn, user)
@@ -83,13 +100,25 @@ defmodule BlogWeb.PostControllerTest do
       conn = get(conn, ~p"/posts/#{post}/edit")
       assert html_response(conn, 200) =~ "Edit Post"
     end
+
+    test "user can not edit other user's post", %{conn: conn} do
+      user = user_fixture()
+      other_user = user_fixture()
+      post = post_fixture(visibility: true, user_id: user.id)
+      conn = conn |> log_in_user(other_user) |> get(~p"/posts/#{post}/edit")
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+               "You can only edit or delete your own posts."
+
+      assert redirected_to(conn) == ~p"/posts/#{post}"
+    end
   end
 
   describe "update post" do
     test "redirects when data is valid", %{conn: conn} do
       user = user_fixture()
       post = post_fixture(visibility: true, user_id: user.id)
-      conn = log_in_user(conn,user)
+      conn = log_in_user(conn, user)
 
       conn = put(conn, ~p"/posts/#{post}", post: @update_attrs)
       assert redirected_to(conn) == ~p"/posts/#{post}"
@@ -98,15 +127,37 @@ defmodule BlogWeb.PostControllerTest do
       assert html_response(conn, 200) =~ "some updated content"
     end
 
-    test "update posts should preserve tags "
+    test "update posts should also update tags", %{conn: conn} do
+      user = user_fixture()
+      tag = tag_fixture()
+      new_tag = tag_fixture(name: "tag2")
+      post = post_fixture(visibility: true, user_id: user.id, tag_ids: [tag.id])
+
+      conn = log_in_user(conn, user)
+
+      conn =
+        put(conn, ~p"/posts/#{post}",
+          post: %{
+            content: "some updated content",
+            visibility: true,
+            title: "some updated title",
+            tag_ids: [new_tag.id]
+          }
+        )
+
+      assert redirected_to(conn) == ~p"/posts/#{post}"
+
+      conn = get(conn, ~p"/posts/#{post}")
+      assert html_response(conn, 200) =~ new_tag.name
+    end
 
     test "renders errors when data is invalid", %{conn: conn} do
       user = user_fixture()
-      # post_fixture(visibility: true, user_id: user.id)
-      conn = log_in_user(conn, user)
+      post = post_fixture(visibility: true, user_id: user.id)
 
-      conn = put(conn, ~p"/posts/", post: @invalid_attrs)
+      conn = conn |> log_in_user(user) |> put(~p"/posts/#{post}", post: @invalid_attrs)
       assert html_response(conn, 200) =~ "Edit Post"
+
     end
   end
 

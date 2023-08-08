@@ -7,8 +7,8 @@ defmodule Blog.PostsFixtures do
   @doc """
   Generate a post.
   """
-  def post_fixture(attrs \\ %{}) do
-    tags = attrs[:tags]
+  def post_fixture(attrs \\ %{}, tags \\ []) do
+    tags = attrs[:tags] || []
     {:ok, post} =
       attrs
       |> Enum.into(%{

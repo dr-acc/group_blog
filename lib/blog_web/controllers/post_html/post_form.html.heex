@@ -7,7 +7,7 @@
   <.input field={f[:visibility]} type="checkbox" label="Visibility" />
   <.input field={f[:content]} type="text" label="Content" />
   <.input field={f[:published_on]} type="datetime-local" label="Published on" value={DateTime.utc_now()} />
-  <.input field={f[:tags_ids]} type="select" multiple={true} options={@tags}/>
+  <.input field={f[:tag_ids]} type="select" multiple={true} options={@tags}/>
   <:actions>
     <.button>Save Post</.button>
   </:actions>
