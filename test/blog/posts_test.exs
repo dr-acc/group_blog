@@ -134,6 +134,24 @@ defmodule Blog.PostsTest do
       assert post.tags == [tag]
     end
 
+    test "create_post/1 with cover image from url" do
+      user = user_fixture()
+
+      valid_attrs = %{
+        content: "some content",
+        title: "some title",
+        cover_image: %{
+          url: "https://www.example.com/image.png"
+        },
+        visibility: true,
+        published_on: DateTime.utc_now(),
+        user_id: user.id
+      }
+
+      assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs)
+      # assert %CoverImage{url: "https://www.example.com/image.png"} = Repo.preload(post, :cover_image).cover_image
+    end
+
     test "update_post/2 with tags" do
       user = user_fixture()
       tag = tag_fixture()

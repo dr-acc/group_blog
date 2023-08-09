@@ -6,6 +6,9 @@
   <.input field={f[:title]} type="text" label="Title" />
   <.input field={f[:visibility]} type="checkbox" label="Visibility" />
   <.input field={f[:content]} type="text" label="Content" />
+  <.inputs_for :let={cover_image} field={f[:cover_image]}>
+    <.input type="text" field={cover_image[:url]} label="Cover Image URL" />
+  </.inputs_for>
   <.input field={f[:published_on]} type="datetime-local" label="Published on" value={DateTime.utc_now()} />
   <.input field={f[:tag_ids]} type="select" multiple={true} options={@tags}/>
   <:actions>
