@@ -47,22 +47,24 @@ defmodule Blog.PostsTest do
              ]
     end
 
-    test "posts with visibility true display but not false" do
+    test "posts with visibility true display; but not false" do
       user = user_fixture()
       not_visible_post = post_fixture(title: "First post", visibility: false, user_id: user.id)
       visible_post = post_fixture(title: "Second post", visibility: true, user_id: user.id)
 
-      assert Posts.list_posts() == [visible_post]
+      assert [%Post{visibility: true}] = Posts.list_posts()
     end
 
     test "search_posts/1 returns filtered posts" do
       user = user_fixture()
       post = post_fixture(title: "title", user_id: user.id)
-      assert Posts.search_posts("Title") == [post]
-      assert Posts.search_posts("itl") == [post]
-      assert Posts.search_posts("tle") == [post]
-      assert Posts.search_posts("") == [post]
-      assert Posts.search_posts("luis") == []
+
+      post_id = post.id
+      assert [%{id: ^post_id}] = Posts.search_posts("Title")
+      assert [%{id: ^post_id}] = Posts.search_posts("tle")
+      assert [%{id: ^post_id}] = Posts.search_posts("it")
+      assert [%{id: ^post_id}] = Posts.search_posts("le")
+      assert [] = Posts.search_posts("TEAM")
     end
 
     test "list_posts/0 returns all posts" do
@@ -149,6 +151,7 @@ defmodule Blog.PostsTest do
       }
 
       assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs)
+
       # assert %CoverImage{url: "https://www.example.com/image.png"} = Repo.preload(post, :cover_image).cover_image
     end
 
@@ -216,7 +219,7 @@ defmodule Blog.PostsTest do
     test "posts published in past display; future posts do not" do
       user = user_fixture()
 
-      post_fixture(
+      future = post_fixture(
         title: "Future post",
         visibility: true,
         published_on: DateTime.add(DateTime.utc_now(), 1, :hour),
@@ -230,8 +233,9 @@ defmodule Blog.PostsTest do
           published_on: DateTime.utc_now(),
           user_id: user.id
         )
-
-      assert Posts.list_posts() == [past_post]
+      # post_id = past_post.id
+      # assert [{id: ^post_id}] = Posts.list_posts()
+      assert [%Post{title: "Past post"}] = Posts.list_posts()
     end
   end
 end

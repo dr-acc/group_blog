@@ -5,7 +5,7 @@ defmodule Blog.Posts.CoverImage do
   schema "cover_images" do
     field :url, :string
 
-    belongs_to :posts, Blog.Posts.Post
+    belongs_to :post, Blog.Posts.Post
 
     timestamps()
   end
