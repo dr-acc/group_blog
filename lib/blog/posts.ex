@@ -6,7 +6,6 @@ defmodule Blog.Posts do
   import Ecto.Query, warn: false
 
   alias Blog.Repo
-  alias Blog.Comments.Comment
   alias Blog.Posts.Post
 
   def search_posts(title \\ "") do

@@ -15,7 +15,8 @@
   <:item title="Post Author"><%= @post.user.username %></:item>
   <:item title="Published on"><%= @post.published_on %></:item>
   <:item title="Tags"><%= Enum.map(@post.tags, fn tag -> tag.name end) %></:item>
-  ### ^Added this first 
+  
+  <:item :if={@post.cover_image} title="Cover Image"><img src={@post.cover_image.url} /></:item>
   <:item title="Content"><%= @post.content %></:item>
   <:item title="Visibility"><%= @post.visibility %></:item>
 </.list>
