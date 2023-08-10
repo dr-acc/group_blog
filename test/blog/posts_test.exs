@@ -11,6 +11,7 @@ defmodule Blog.PostsTest do
     import Blog.CommentsFixtures
     import Blog.AccountsFixtures
     import Blog.TagsFixtures
+
     @invalid_attrs %{content: nil, visibility: nil, title: nil, published_on: nil}
 
     test "posts sorted most recent on top" do
@@ -19,7 +20,8 @@ defmodule Blog.PostsTest do
       first_post =
         post_fixture(
           title: "First post",
-          published_on: ~U[2023-07-25 18:14:15Z],
+          visibility: true,
+          published_on: ~U[2023-08-10 01:14:15Z],
           visibility: true,
           user_id: user.id
         )
@@ -27,7 +29,8 @@ defmodule Blog.PostsTest do
       second_post =
         post_fixture(
           title: "Second post",
-          published_on: ~U[2023-07-26 18:14:15Z],
+          visibility: true,
+          published_on: ~U[2023-08-10 02:14:15Z],
           visibility: true,
           user_id: user.id
         )
@@ -35,7 +38,8 @@ defmodule Blog.PostsTest do
       third_post =
         post_fixture(
           title: "Third post",
-          published_on: ~U[2023-07-27 18:14:15Z],
+          visibility: true,
+          published_on: ~U[2023-08-10 03:14:15Z],
           visibility: true,
           user_id: user.id
         )
@@ -152,7 +156,7 @@ defmodule Blog.PostsTest do
 
       assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs)
 
-      # assert %CoverImage{url: "https://www.example.com/image.png"} = Repo.preload(post, :cover_image).cover_image
+      assert %Blog.Posts.CoverImage{url: "https://www.example.com/image.png"} = Repo.preload(post, :cover_image).cover_image
     end
 
     test "update_post/2 with tags" do
@@ -171,6 +175,30 @@ defmodule Blog.PostsTest do
 
       assert {:ok, %Post{} = updated_post} = Posts.update_post(post, valid_attrs, [other_tag])
       assert updated_post.tags == [other_tag]
+    end
+
+    test "update_post/1 add an image" do
+
+      user = user_fixture()
+      post = post_fixture(content: "some content",
+      title: "some title",
+      cover_image: %{
+        url: "https://www.example.com/image.png"
+      },
+      visibility: true,
+      published_on: DateTime.utc_now(),
+      user_id: user.id)
+
+      assert {:ok, %Post{} = post} = Posts.update_post(post, %{cover_image: %{url: "https://www.example.com/image2.png"}})
+      assert post.cover_image.url == "https://www.example.com/image2.png"
+    end
+
+    test "update_post/1 update existing image" do
+      user = user_fixture()
+      post = post_fixture(user_id: user.id, visibility: true, cover_image: %{url: "https://www.example.com/image.png"})
+
+      assert {:ok, %Post{} = post} = Posts.update_post(post, %{cover_image: %{url: "https://www.example.com/image2.png"}})
+      assert post.cover_image.url == "https://www.example.com/image2.png"
     end
 
     test "update_post/2 with valid data updates the post" do
@@ -194,7 +222,7 @@ defmodule Blog.PostsTest do
 
     test "update_post/2 with invalid data returns error changeset" do
       user = user_fixture()
-      post = post_fixture(user_id: user.id)
+      post = post_fixture(user_id: user.id, visibility: true,)
       assert {:error, %Ecto.Changeset{}} = Posts.update_post(post, @invalid_attrs)
       fetched_post = Posts.get_post!(post.id)
       assert post.published_on == fetched_post.published_on
@@ -204,9 +232,17 @@ defmodule Blog.PostsTest do
 
     test "delete_post/1 deletes the post" do
       user = user_fixture()
-      post = post_fixture(user_id: user.id)
+      post = post_fixture(user_id: user.id, visibility: true,)
       assert {:ok, %Post{}} = Posts.delete_post(post)
       assert_raise Ecto.NoResultsError, fn -> Posts.get_post!(post.id) end
+    end
+
+    test "delete_post/1 deletes post and cover image" do
+      user = user_fixture()
+      post = post_fixture(user_id: user.id, visibility: true, cover_image: %{url: "https://www.example.com/image.png"})
+      assert {:ok, %Post{}} = Posts.delete_post(post)
+      assert_raise Ecto.NoResultsError, fn -> Posts.get_post!(post.id) end
+      assert_raise Ecto.NoResultsError, fn -> Repo.get!(Blog.Posts.CoverImage, post.cover_image.id) end
     end
 
     test "change_post/1 returns a post changeset" do
@@ -215,10 +251,8 @@ defmodule Blog.PostsTest do
       assert %Ecto.Changeset{} = Posts.change_post(post)
     end
 
-    # test that posts with future dates don't show yet
     test "posts published in past display; future posts do not" do
       user = user_fixture()
-
       future = post_fixture(
         title: "Future post",
         visibility: true,
@@ -233,8 +267,6 @@ defmodule Blog.PostsTest do
           published_on: DateTime.utc_now(),
           user_id: user.id
         )
-      # post_id = past_post.id
-      # assert [{id: ^post_id}] = Posts.list_posts()
       assert [%Post{title: "Past post"}] = Posts.list_posts()
     end
   end

@@ -88,6 +88,36 @@ defmodule BlogWeb.PostControllerTest do
       conn = conn |> log_in_user(user) |> post(~p"/posts", post: @invalid_attrs)
       assert html_response(conn, 200) =~ "New Post"
     end
+
+    test "create post with cover image", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      create_attrs = %{
+        content: "some content",
+        title: "some title",
+        visibility: true,
+        published_on: DateTime.utc_now(),
+        user_id: user.id,
+        cover_image: %{
+          url: "https://www.example.com/image.png"
+        }
+      }
+
+      conn = post(conn, ~p"/posts", post: create_attrs)
+
+      assert %{id: id} = redirected_params(conn)
+      assert redirected_to(conn) == ~p"/posts/#{id}"
+
+      post = Posts.get_post!(id)
+      # post was created with cover image
+      assert %Blog.Posts.CoverImage{url: "https://www.example.com/image.png"} = post.cover_image
+      # post cover image is displayed on show page
+      # assert %{id: id} = redirected_params(conn)
+      conn = get(conn, ~p"/posts/#{id}")
+      assert html_response(conn, 200) =~ "https://www.example.com/image.png"
+    end
+
   end
 
   describe "edit post" do
@@ -157,7 +187,6 @@ defmodule BlogWeb.PostControllerTest do
 
       conn = conn |> log_in_user(user) |> put(~p"/posts/#{post}", post: @invalid_attrs)
       assert html_response(conn, 200) =~ "Edit Post"
-
     end
   end
 
